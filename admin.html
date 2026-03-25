@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itihas Pro Admin</title>
+    <style>
+        body { font-family: sans-serif; background: #050505; color: white; padding: 20px; }
+        .box { background: #111; padding: 20px; border-radius: 20px; border: 1px solid #333; }
+        select, input, textarea { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 16px; background: #D35400; color: white; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h3>Update App</h3>
+    <div class="box">
+        <select id="cat">
+            <option value="bios">Warriors</option>
+            <option value="gita">Gita</option>
+            <option value="mantras">Mantras</option>
+            <option value="places">Spiritual Places</option>
+            <option value="morals">Moral Stories</option>
+        </select>
+        <input type="text" id="t" placeholder="Title / Mantra Name">
+        <textarea id="d" rows="4" placeholder="Description / Meaning"></textarea>
+        <input type="text" id="i" placeholder="Image URL (For Places/Bios)">
+        <button onclick="add()">Publish Live</button>
+    </div>
+
+    <script>
+        function add() {
+            let db = JSON.parse(localStorage.getItem('my_app_db')) || { bios: [], gita: [], morals: [], mantras: [], places: [] };
+            const newItem = { t: document.getElementById('t').value, d: document.getElementById('d').value, i: document.getElementById('i').value };
+            db[document.getElementById('cat').value].push(newItem);
+            localStorage.setItem('my_app_db', JSON.stringify(db));
+            alert("Success!");
+        }
+    </script>
+</body>
+</html>
