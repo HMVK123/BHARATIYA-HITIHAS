@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin | Bharatiya Itihas</title>
+    <style>
+        body { font-family: sans-serif; background: #050505; color: white; padding: 20px; }
+        .box { background: #111; padding: 20px; border-radius: 20px; border: 1px solid #333; }
+        h2 { color: #FFD700; text-align: center; }
+        select, input, textarea { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 16px; background: #D35400; color: white; border: none; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; transition: 0.3s; }
+        button:disabled { background: #555; }
+        .info { font-size: 12px; color: #888; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Master Control</h2>
+    <div class="box">
+        <label>Select Section</label>
+        <select id="cat">
+            <option value="bios">Warriors</option>
+            <option value="gita">Gita</option>
+            <option value="mantras">Mantras</option>
+            <option value="places">Spiritual Places</option>
+            <option value="morals">Moral Stories</option>
+        </select>
+        <input type="text" id="t" placeholder="Title / Mantra Name">
+        <textarea id="d" rows="5" placeholder="Content / Meaning / Description"></textarea>
+        <input type="text" id="i" placeholder="Image URL (Leave empty for mantras)">
+        <button id="btn" onclick="publish()">🚀 Publish Live to All Users</button>
+        <p class="info">This will update the app globally via GitHub Cloud.</p>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const GIST_ID = "<script src="https://gist.github.com/HMVK123/fba50c90c9b6b279dc52dd288aa11206.js"><";
+       const TOKEN = "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";
+
+      async function publish() {
+            const btn = document.getElementById('btn');
+            const originalText = btn.innerText;
+            
+            // Basic validation
+            if(!document.getElementById('t').value || !document.getElementById('d').value) {
+                alert("Please fill Title and Description");
+                return;
+            }
+
+            btn.innerText = "⏳ Syncing with Cloud...";
+            btn.disabled = true;
+
+            try {
+                // 1. Fetch current data from GitHub
+                const res = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+                const gist = await res.json();
+                let content = JSON.parse(gist.files["data.json"].content);
+
+                // 2. Prepare new entry
+                const cat = document.getElementById('cat').value;
+                const newItem = {
+                    t: document.getElementById('t').value,
+                    d: document.getElementById('d').value,
+                    i: document.getElementById('i').value
+                };
+
+                // 3. Update category list
+                if(!content[cat]) content[cat] = [];
+                content[cat].push(newItem);
+
+                // 4. Save updated data back to GitHub
+                const updateRes = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                    method: "PATCH",
+                    headers: { 
+                        "Authorization": `token ${TOKEN}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ 
+                        files: { "data.json": { content: JSON.stringify(content) } } 
+                    })
+                });
+
+                if(updateRes.ok) {
+                    btn.innerText = "✅ Successfully Published!";
+                    document.getElementById('t').value = "";
+                    document.getElementById('d').value = "";
+                    document.getElementById('i').value = "";
+                } else {
+                    throw new Error("Cloud update failed");
+                }
+            } catch (e) {
+                alert("Error: Check your Token/Gist ID or Internet.");
+                btn.innerText = "❌ Failed";
+            } finally {
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
